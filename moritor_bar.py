@@ -3,47 +3,51 @@ from tkinter import ttk
 import sys
 from process import CpuBar
 
+
 class Application(tk.Tk):
 
     def __init__(self):
         tk.Tk.__init__(self)
 
-        self.attributes('-alpha', 1) # устанавливаем прозрачность
-        self.attributes('-topmost', True) # поверх всех окон
+        self.attributes("-alpha", 1)  # устанавливаем прозрачность
+        self.attributes("-topmost", True)  # поверх всех окон
         # self.overrideredirect(True)
-        self.resizable(False, False) # неизменный размер
-        self.title('CPU-RAM')
+        self.resizable(False, False)  # неизменный размер
+        self.title("CPU-RAM")
 
         self.cpu = CpuBar()
         self.set_ui()
         self.make_bar_cpu_usage()
 
     def set_ui(self):
-        exit_button = ttk.Button(self, text='Exit', command=self.app_exit)
+        exit_button = ttk.Button(self, text="Exit", command=self.app_exit)
         exit_button.pack(fill=tk.X)
 
-        self.bar2 = ttk.LabelFrame(self, text='Manual')
+        self.bar2 = ttk.LabelFrame(self, text="Manual")
         self.bar2.pack(fill=tk.X)
 
-        self.combo_win = ttk.Combobox(self.bar2,
-                                      values=['hide', "don't hide", 'min'],
-                                      width=9, state='readonly')
+        self.combo_win = ttk.Combobox(
+            self.bar2, values=["hide", "don't hide", "min"], width=9, state="readonly"
+        )
         self.combo_win.current(1)
         self.combo_win.pack(side=tk.LEFT)
 
-        ttk.Button(self.bar2, text='Move').pack(side=tk.LEFT)
-        ttk.Button(self.bar2, text='>>>').pack(side=tk.LEFT)
+        ttk.Button(self.bar2, text="Move").pack(side=tk.LEFT)
+        ttk.Button(self.bar2, text=">>>").pack(side=tk.LEFT)
 
-        self.bar1 = ttk.LabelFrame(self, text='Power')
+        self.bar1 = ttk.LabelFrame(self, text="Power")
         self.bar1.pack(fill=tk.BOTH)
 
-        self.bind_class('Tk', '<Enter>', self.enter_mouse)
-        self.bind_class('Tk', '<Leave>', self.leave_mouse)
+        self.bind_class("Tk", "<Enter>", self.enter_mouse)
+        self.bind_class("Tk", "<Leave>", self.leave_mouse)
 
     def make_bar_cpu_usage(self):
-        ttk.Label(self.bar1, text=f'physical cores: {self.cpu.cpu_count}, logical cores: {self.cpu.cpu_count_logical}',
-                  anchor=tk.CENTER).pack(fill=tk.X)
-        self.list_label =[]
+        ttk.Label(
+            self.bar1,
+            text=f"physical cores: {self.cpu.cpu_count}, logical cores: {self.cpu.cpu_count_logical}",
+            anchor=tk.CENTER,
+        ).pack(fill=tk.X)
+        self.list_label = []
         self.list_pbar = []
         
         for i in range(self.cpu.cpu_count_logical):
@@ -51,21 +55,22 @@ class Application(tk.Tk):
             self.list_pbar.append(ttk.Progressbar(self.bar1, length=100))
 
         for i in range(self.cpu.cpu_count_logical):
-             self.list_label[i].pack(fill = tk.X)
-             self.list_pbar[i].pack(fill = tk.X)
+            self.list_label[i].pack(fill=tk.X)
+            self.list_pbar[i].pack(fill=tk.X)
 
     def enter_mouse(self, event):
         if self.combo_win.current() in [0, 1]:
-            self.geometry('')
+            self.geometry("")
 
     def leave_mouse(self, event):
         if self.combo_win.current() == 0:
-            self.geometry(f'{self.winfo_width()}x1')
+            self.geometry(f"{self.winfo_width()}x1")
 
     def app_exit(self):
         self.deiconify()
         sys.exit()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     root = Application()
     root.mainloop()

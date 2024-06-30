@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import sys
+from process import CpuBar
 
 class Application(tk.Tk):
 
@@ -13,7 +14,9 @@ class Application(tk.Tk):
         self.resizable(False, False) # неизменный размер
         self.title('CPU-RAM')
 
+        self.cpu = CpuBar()
         self.set_ui()
+        self.make_bar_cpu_usage()
 
     def set_ui(self):
         exit_button = ttk.Button(self, text='Exit', command=self.app_exit)
@@ -22,8 +25,8 @@ class Application(tk.Tk):
         self.bar2 = ttk.LabelFrame(self, text='Manual')
         self.bar2.pack(fill=tk.X)
 
-        self.combo_win = ttk.Combobox(self.bar2, 
-                                      values=['hide', "don't hide", 'min'], 
+        self.combo_win = ttk.Combobox(self.bar2,
+                                      values=['hide', "don't hide", 'min'],
                                       width=9, state='readonly')
         self.combo_win.current(1)
         self.combo_win.pack(side=tk.LEFT)
@@ -31,16 +34,30 @@ class Application(tk.Tk):
         ttk.Button(self.bar2, text='Move').pack(side=tk.LEFT)
         ttk.Button(self.bar2, text='>>>').pack(side=tk.LEFT)
 
-        self.bar2 = ttk.LabelFrame(self, text='Power')
-        self.bar2.pack(fill=tk.BOTH)
+        self.bar1 = ttk.LabelFrame(self, text='Power')
+        self.bar1.pack(fill=tk.BOTH)
 
         self.bind_class('Tk', '<Enter>', self.enter_mouse)
         self.bind_class('Tk', '<Leave>', self.leave_mouse)
 
-    def enter_mouse(self, event):
-        if self.combo_win.current() == 0 or 1:
-            self.geometry('')
+    def make_bar_cpu_usage(self):
+        ttk.Label(self.bar1, text=f'physical cores: {self.cpu.cpu_count}, logical cores: {self.cpu.cpu_count_logical}',
+                  anchor=tk.CENTER).pack(fill=tk.X)
+        self.list_label =[]
+        self.list_pbar = []
         
+        for i in range(self.cpu.cpu_count_logical):
+            self.list_label.append(ttk.Label(self.bar1, anchor=tk.CENTER))
+            self.list_pbar.append(ttk.Progressbar(self.bar1, length=100))
+
+        for i in range(self.cpu.cpu_count_logical):
+             self.list_label[i].pack(fill = tk.X)
+             self.list_pbar[i].pack(fill = tk.X)
+
+    def enter_mouse(self, event):
+        if self.combo_win.current() in [0, 1]:
+            self.geometry('')
+
     def leave_mouse(self, event):
         if self.combo_win.current() == 0:
             self.geometry(f'{self.winfo_width()}x1')
@@ -49,5 +66,6 @@ class Application(tk.Tk):
         self.deiconify()
         sys.exit()
 
-root = Application()
-root.mainloop()
+if __name__ == '__main__':
+    root = Application()
+    root.mainloop()

@@ -1,4 +1,4 @@
-class Configure_widgets:
+class ConfigureWidgets:
 
     def configure_cpu_bar(self):
 
@@ -8,8 +8,26 @@ class Configure_widgets:
             self.list_pbar[i].configure(value=r[i])
 
         r2 = self.cpu.ram_usage()
-        self.ram_lab.configure(text=f'RAM usage: {r2[2]}%, used: {round(r2[3]/1048576)} Mb,\
-                               \n avalible: {round(r2[1]/1048576)} Mb')
+        self.ram_lab.configure(
+            text=f"RAM usage: {r2[2]}%, used: {round(r2[3]/1048576)} Mb,\
+                               \n avalible: {round(r2[1]/1048576)} Mb"
+        )
         self.ram_bar.configure(value=r2[2])
 
         self.wheel = self.after(1000, self.configure_cpu_bar)
+
+    def configure_win(self):
+        if self.wm_overrideredirect():
+            self.overrideredirect(False)
+        else:
+            self.overrideredirect(True)
+        self.update()
+
+    def clear_win(self):
+        for i in self.winfo_children():
+            i.destroy()
+
+    def configure_min_win(self):
+        self.bar_one.configure(value=self.cpu.cpu_one_return())
+        self.ram_bar.configure(value=self.cpu.ram_usage()[2])
+        self.wheel = self.after(1000, self.configure_min_win)

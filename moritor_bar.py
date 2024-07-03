@@ -2,21 +2,24 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 from process import CpuBar
-from widget_update import Configure_widgets
+from widget_update import ConfigureWidgets
 
 
-class Application(tk.Tk, Configure_widgets):
+class Application(tk.Tk, ConfigureWidgets):
 
     def __init__(self):
         tk.Tk.__init__(self)
 
         self.attributes("-alpha", 1)  # устанавливаем прозрачность
         self.attributes("-topmost", True)  # поверх всех окон
-        # self.overrideredirect(True)
+        self.overrideredirect(True)
         self.resizable(False, False)  # неизменный размер
         self.title("CPU-RAM")
 
         self.cpu = CpuBar()
+        self.run_set_ui()
+
+    def run_set_ui(self):
         self.set_ui()
         self.make_bar_cpu_usage()
         self.configure_cpu_bar()
@@ -34,7 +37,9 @@ class Application(tk.Tk, Configure_widgets):
         self.combo_win.current(1)
         self.combo_win.pack(side=tk.LEFT)
 
-        ttk.Button(self.bar2, text="Move").pack(side=tk.LEFT)
+        ttk.Button(self.bar2, text="Move", command=self.configure_win).pack(
+            side=tk.LEFT
+        )
         ttk.Button(self.bar2, text=">>>").pack(side=tk.LEFT)
 
         self.bar1 = ttk.LabelFrame(self, text="Power")
@@ -42,6 +47,7 @@ class Application(tk.Tk, Configure_widgets):
 
         self.bind_class("Tk", "<Enter>", self.enter_mouse)
         self.bind_class("Tk", "<Leave>", self.leave_mouse)
+        self.combo_win.bind("<<ComboboxSelected>>", self.choice_combo)
 
     def make_bar_cpu_usage(self):
         ttk.Label(
@@ -51,7 +57,7 @@ class Application(tk.Tk, Configure_widgets):
         ).pack(fill=tk.X)
         self.list_label = []
         self.list_pbar = []
-        
+
         for i in range(self.cpu.cpu_count_logical):
             self.list_label.append(ttk.Label(self.bar1, anchor=tk.CENTER))
             self.list_pbar.append(ttk.Progressbar(self.bar1, length=100))
@@ -60,10 +66,27 @@ class Application(tk.Tk, Configure_widgets):
             self.list_label[i].pack(fill=tk.X)
             self.list_pbar[i].pack(fill=tk.X)
 
-        self.ram_lab = ttk.Label(self.bar1, text='', anchor=tk.CENTER)
+        self.ram_lab = ttk.Label(self.bar1, text="", anchor=tk.CENTER)
         self.ram_lab.pack(fill=tk.X)
         self.ram_bar = ttk.Progressbar(self.bar1, length=100)
         self.ram_bar.pack(fill=tk.X)
+
+    def make_min_win(self):
+        self.bar_one = ttk.Progressbar(self, length=100)
+        self.bar_one.pack(side=tk.LEFT)
+
+        self.ram_bar = ttk.Progressbar(self, length=100)
+        self.ram_bar.pack(side=tk.LEFT)
+
+        ttk.Button(self, text="Full",
+                   command=self.make_full_win, width=5).pack(side=tk.RIGHT)
+
+        ttk.Button(self, text="Move",
+                   command=self.configure_win, width=5).pack(side=tk.RIGHT)
+
+        self.update()
+        self.configure_min_win()
+
 
     def enter_mouse(self, event):
         if self.combo_win.current() in [0, 1]:
@@ -72,6 +95,26 @@ class Application(tk.Tk, Configure_widgets):
     def leave_mouse(self, event):
         if self.combo_win.current() == 0:
             self.geometry(f"{self.winfo_width()}x1")
+
+    def choice_combo(self, event):
+        if self.combo_win.current() == 2:
+            self.enter_mouse("")
+            self.unbind_class("Tk", "<Enter>")
+            self.unbind_class("Tk", "<Leave>")
+            self.combo_win.unbind("<<ComboboxSelected>>")
+            self.after_cancel(self.wheel)
+            self.clear_win()
+            self.update()
+            self.make_min_win()
+
+    def make_full_win(self):
+        self.after_cancel(self.wheel)
+        self.clear_win()
+        self.update()
+        self.run_set_ui()
+        self.enter_mouse('')
+        self.combo_win.current(1)
+
 
     def app_exit(self):
         self.deiconify()
